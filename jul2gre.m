@@ -1,0 +1,21 @@
+function [Anio Mes Dia]=jul2gre(J)
+J=J+0.5;
+Z=floor(J);
+F=J-Z;
+alpha=floor((Z-1867216.25)/36524.25);
+A=Z+1+alpha-floor(alpha/4);
+Ind=find(Z<2299161);
+A(Ind)=Z(Ind);
+B=A+1524;
+C=floor((B-122.1)/365.25);
+D=floor(365.25*C);
+E=floor((B-D)/30.6001);
+Dia=B-D-floor(30.6001*E)+F;
+Ind1=find(E<14);
+Mes=zeros(length(J),1);
+Mes(Ind1)=E(Ind1)-1;
+Ind2=find(E>=14);
+Mes(Ind2)=E(Ind2)-13;
+Anio=C-4715;
+Ind=find(Mes>2);
+Anio(Ind)=C(Ind)-4716;

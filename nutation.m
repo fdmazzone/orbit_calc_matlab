@@ -1,0 +1,14 @@
+function [dpsi,eps,T]=nutation(D,M,A)
+ddt=dt(A);%diferencia entre tiempo dinámico y TU
+JDE=gre2jul(D,M,A)+ddt/86400;%día juliano de efemérides
+T=(JDE-2451545)/36525; % Diferencia en siglos de tiempo con J2000
+L=280.4665+36000.7698*T; %longitud media del sol
+Lp=218.3165+481267.8813*T; %longitud media de la luna
+ome=125.04452-1934.136261*T; %longitud del nodo ascendente de la luna
+ome=ome*(pi/180);
+L=L*(pi/180);
+Lp=Lp*(pi/180);
+deps=(9.2*cos(ome)+.57*cos(2*L)+.1*cos(2*Lp)-.09*cos(2*ome))/3600;
+eps0=23.43929111-46.815*T/3600-0.00059*T^2/3600+0.001813*T^3/3600; %oblicuidad media
+dpsi=(-17.2*sin(ome)-1.32*sin(2*L)-0.23*sin(2*Lp)+0.21*sin(2*ome))/3600;%nutac`ón en longitud
+eps=eps0+deps;
