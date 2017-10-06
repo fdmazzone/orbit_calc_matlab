@@ -13,7 +13,7 @@ end
 if nargout
     [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
 else
-    gui_mainfcn(gui_State, varargin{:});
+   gui_mainfcn(gui_State, varargin{:});
 end
 % End initialization code - DO NOT EDIT
 
@@ -77,10 +77,8 @@ else
 end
 set(handles.edit_zonahoraria,'String',num2str(observador.UToffset));
 set(handles.edit_directorio1,'String',observador.directorio1);
-set(handles.edit_ucac3,'String',observador.directorio_ucac3);
-set(handles.edit_UCAC2,'String',observador.directorio_ucac2);
+set(handles.edit_ucac4,'String',observador.directorio_ucac4);
 set(handles.edit_directorio,'String',observador.directorio);
-set(handles.edit_directorio_ciel,'String',observador.directorio_ciel);
 set(handles.edit_distancia_focal,'String',num2str(observador.focal));
 set(handles.edit_sensor_ancho,'String',num2str(fix(observador.fov(1)*60/observador.res)));
 set(handles.edit_sensor_alto,'String',num2str(fix(observador.fov(2)*60/observador.res)));
@@ -88,30 +86,25 @@ set(handles.edit_pixel_ancho,'String',num2str(tand(observador.res/3600)*observad
 set(handles.edit_pixel_alto,'String',num2str(tand(observador.res/3600)*observador.focal*1000));
 
 switch observador.cat_activo
-    case 'UCAC2'
-        set(handles.rd_UCAC2,'Value',1.0);
-        set(handles.rd_UCAC3,'Value',0.0);
-        set(handles.rb_internet,'Value',0.0);
-    case 'UCAC3'
-        set(handles.rd_UCAC2,'Value',0.0);
-        set(handles.rd_UCAC3,'Value',1.0);
+    case 'UCAC4'
+        set(handles.rd_UCAC4,'Value',1.0);
         set(handles.rb_internet,'Value',0.0);
     otherwise
-        set(handles.rd_UCAC2,'Value',0.0);
-        set(handles.rd_UCAC3,'Value',0.0);
+        set(handles.rd_UCAC4,'Value',0.0);
         set(handles.rb_internet,'Value',1.0);
-        switch observador.cat_activo(10:end);
-            case 'UCAC3'
-                set(handles.pm_catalogo,'Value',1);
-            case 'CMC14'
-                set(handles.pm_catalogo,'Value',2);
-            case 'USNOA2'
-                set(handles.pm_catalogo,'Value',4);
-            case 'PPMXL'
-                set(handles.pm_catalogo,'Value',3);
-            case 'UCAC4'
-                set(handles.pm_catalogo,'Value',5);
-        end
+%        set(handles.pm_catalogo,'Value',1);
+%         switch observador.cat_activo(10:end);
+%             case 'UCAC3'
+%                 set(handles.pm_catalogo,'Value',1);
+%             case 'CMC14'
+%                 set(handles.pm_catalogo,'Value',2);
+%             case 'USNOA2'
+%                 set(handles.pm_catalogo,'Value',4);
+%             case 'PPMXL'
+%                 set(handles.pm_catalogo,'Value',3);
+%             case 'UCAC4'
+%                 set(handles.pm_catalogo,'Value',5);
+%         end
 end
 guidata(hObject, handles);
 
@@ -230,18 +223,9 @@ set(handles.edit_directorio,'String',directorio);
 
 
 
-function edit_directorio_ciel_Callback(hObject, eventdata, handles)
-function edit_directorio_ciel_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
 
 
-function pushbutton_dir_ciel_Callback(hObject, eventdata, handles)
-directorio_ciel = uigetdir;
-set(handles.edit_directorio_ciel,'String',directorio_ciel);
+
 
 
 
@@ -335,9 +319,7 @@ function pushbutton_guardar_Callback(hObject, eventdata, handles)
 
 observador.directorio1=get(handles.edit_directorio1,'String');
 observador.directorio=get(handles.edit_directorio,'String');
-observador.directorio_ciel=get(handles.edit_directorio_ciel,'String');
-observador.directorio_ucac3=get(handles.edit_ucac3,'String');
-observador.directorio_ucac2=get(handles.edit_UCAC2,'String');
+observador.directorio_ucac4=get(handles.edit_ucac4,'String');
 observador.name_obs=get(handles.edit_nombre,'String');
 observador.UToffset=str2num(get(handles.edit_zonahoraria,'String'));
 observador.focal=str2num(get(handles.edit_distancia_focal,'String'));
@@ -353,18 +335,16 @@ fov2=long_sensor2*observador.res2/60;
 observador.fov=[fov1,fov2];
 observador.cod=get(handles.edit_codigo,'String');
 es_vacio_cod=isempty(observador.cod);
-observador.cat_activo=get(handles.rd_UCAC2,'Value');
+%observador.cat_activo=get(handles.rd_UCAC3,'Value');
 
 switch true
-    case get(handles.rd_UCAC2,'Value')
-        observador.cat_activo='UCAC2';
-    case get(handles.rd_UCAC3,'Value')
-        observador.cat_activo='UCAC3';
+    case get(handles.rd_UCAC4,'Value')
+        observador.cat_activo='UCAC4';
     otherwise
         observador.cat_activo='Internet';
         Valor=get(handles.pm_catalogo,'Value');
         Catalogo=get(handles.pm_catalogo,'String');
-        Catalogo=Catalogo{Valor};
+        Catalogo=Catalogo(Valor,:);
         observador.cat_activo=[observador.cat_activo,'-',Catalogo];
         
         
@@ -461,17 +441,6 @@ close(Configuracion);
 
 
 
-function edit_ucac3_Callback(hObject, eventdata, handles)
-function edit_ucac3_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-function pb_ucac3_Callback(hObject, eventdata, handles)
-directorio_ucac3 = uigetdir;
-set(handles.edit_ucac3,'String',directorio_ucac3);
-
 
 % --------------------------------------------------------------------
 function Descargas_Callback(hObject, eventdata, handles)
@@ -501,7 +470,16 @@ switch true
     case isunix
         load([getenv('HOME'),'/.orbit_calc2.0/observer.mat']);
 end
-urlwrite('http://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt',[observador.directorio,'\COMET.dat']);
+
+switch true
+    case ispc
+        camino=[observador.directorio,'\COMET.dat'];
+    case isunix
+        camino=[observador.directorio,'/COMET.dat'];
+end
+
+
+urlwrite('http://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt',camino);
 close(Mensaje);
 base_com;
 
@@ -576,23 +554,13 @@ switch true
 end
 
 
-function edit_UCAC2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit_UCAC2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function edit_ucac4_Callback(hObject, eventdata, handles)
 
-% Hints: get(hObject,'String') returns contents of edit_UCAC2 as text
-%        str2double(get(hObject,'String')) returns contents of edit_UCAC2 as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit_UCAC2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_UCAC2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+function edit_ucac4_CreateFcn(hObject, eventdata, handles)
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -600,8 +568,8 @@ end
 
 % --- Executes on button press in pb_ucac2.
 function pb_ucac2_Callback(hObject, eventdata, handles)
-directorio_ucac2 = uigetdir;
-set(handles.edit_UCAC2,'String',directorio_ucac2);
+directorio_ucac4 = uigetdir;
+set(handles.edit_ucac4,'String',directorio_ucac4);
 
 
 % --- Executes on selection change in pm_catalogo.
@@ -625,3 +593,6 @@ function pm_catalogo_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+

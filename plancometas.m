@@ -1,17 +1,37 @@
-function plancometas(ARLim,DELim,MagLim,ElogSLim,ElongLLim, PrimeraEpoca,SaltoEpoc,CantEpoc)
+function plancometas(ARLim,DELim,MagLim,ElongSLim,ElongLLim)
 
 load('cometas.mat');
+switch true
+    case ispc
+        load([getenv('APPDATA'),'\orbit_calc2.0\observer.mat']);
+    case isunix
+        load([getenv('HOME'),'/.orbit_calc2.0/observer.mat']);
+end
 
-EpocEfemer=(PrimeraEpoca:SaltoEpoc:(PrimeraEpoca+(CantEpoc-1)*SaltoEpoc));
+
+
+if nargin>5 && strcmp(varargin{1},'date');
+        Anio=varargin{2};
+        Mes=varargin{3};
+        Dia=varargin{4};
+else
+        hoy=now;
+        hoy=hoy+1721058.5-observador.UToffset/24;
+        [Anio Mes Dia]=jul2gre(hoy);
+end
+EpocEfemer=gre2jul(Dia, Mes, Anio);
 EpocEfemer=[EpocEfemer;EpocEfemer+1/(24*60)];
 EpocEfemer=EpocEfemer(:);
-CantEpoc=2*CantEpoc;
+CantEpoc=2;
+
+
+
 
 
 %[Anio Mes Dia]=jul2gre(tfin);
 
 Pos0=cometas.posiciones';
-PosDot0=cometas.velocidades;
+PosDot0=cometas.velocidades';
 CantCuerposMenores=size(Pos0,2);
 Pos0=(Pos0(:));
 PosDot0=(PosDot0(:));
@@ -272,76 +292,42 @@ beta=beta(cantidad_planetas:end,:,:);
 FracIlumLuna=squeeze((1+cosd(beta_luna))/2);
 mag=repmat(H,[1,1,size(AR,3)])+5*log10(Delta_corr(cantidad_planetas+1:end,:,:))+2.5*repmat(G,[1,1,size(AR,3)]).*log10(r_corr(cantidad_planetas:end,:,:));
 
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%Hasta aca llegue%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% %%%Elongacion solar
 
-progreso=waitbar(0,'Procesando Cometas');
+elong_sol=motion(AR,DE, repmat(AR(1),size(AR)),repmat(DE(1),size(AR)) )/3600;
+% %%Elongacion Lunar
 
-for j=1:length(cometas.H);
+elong_luna=motion(AR,DE,...
+    repmat(AR(luna_observador-1),size(AR)),repmat(DE(luna_observador-1),size(AR)) )/3600;
 
-waitbar((j-1)/100,progreso,cometas.designacion(j,:));
-    
+ARSol=AR(1);
+DESol=DE(1);
 
+AR=AR(cantidad_planetas+1:end);
+DE=DE(cantidad_planetas+1:end);
+Altitud=Altitud(cantidad_planetas+1:end);
+Azimut=Azimut(cantidad_planetas+1:end);
+Delta=Delta(cantidad_planetas+2:end);
+AngHorario=AngHorario(cantidad_planetas+1:end);
+PA=PA(cantidad_planetas+1:end);
+mov_apar=mov_apar(cantidad_planetas+1:end);
 
-%[AR1(j) DE(j) mag1(j) Delta(j) motion(j) PA(j)]=orbit_calcDEcome(cometas.epocas(j),tfin,[cometas.posiciones(j,:),cometas.velocidades(j,:)], cometas.H(j),cometas.G(j));
+elong_sol=elong_sol(cantidad_planetas+1:end);
+elong_luna=elong_luna(cantidad_planetas+1:end);
+if ARLim(1)<=ARLim(2)
+    Indices=find(ARLim(1)<AR & AR<ARLim(2) & DELim(1)<DE& DE<DELim(2)...
+        & MagLim>mag & elong_sol>ElongSLim & elong_luna>=ElongLLim);
+else
+    Indices=find((ARLim(1)<AR | AR<ARLim(2)) & DELim(1)<DE& DE<DELim(2)...
+        & MagLim>mag & elong_sol>ElongSLim & elong_luna>=ElongLLim);
 end
-
-AR=AR1';
-DE=DE';
-Delta=Delta';
-%motion=motion';
-PA=PA';
-mag1=mag1';
-
-
-clc;
-disp('Buscando cuerpos con los par�metros especificados....')
-%%Buscando los cuerpos en el campo especificado
-[ARsol,DEsol]=possol(Dia, Mes, Anio);
-ARsol=ARsol/15;
-for j=1:length(AR)
-    elong_solar(j)=ang_dist(ARsol,DEsol,AR(j),DE(j));
-end
-
-elong_solar=elong_solar';
-
-
-
-
-
-
-
-Indices=find(DE<=DElim & mag1<mag & elong_solar>elong_solarlim);
-
-
 
 
 [borrar, correctorIndices]=sort(AR(Indices),'ascend');
 Indices=Indices(correctorIndices);
-correctorIndices1=find(AR(Indices,1)<=ARsol);
-correctorIndices2=find(AR(Indices,1)>ARsol);
+correctorIndices1=find(AR(Indices,1)<=ARSol);
+correctorIndices2=find(AR(Indices,1)>ARSol);
 Indices=[Indices(correctorIndices2);Indices(correctorIndices1)];
 
 
@@ -349,11 +335,11 @@ Indices=[Indices(correctorIndices2);Indices(correctorIndices1)];
 
 %=========================================================================
 %=========================================================================
-close(progreso)
 
- disp('preparando resultados....');
  
-  pos=[degree2dms(AR(Indices)),degree2dms(DE(Indices)),mag1(Indices),Delta(Indices),motion(Indices),PA(Indices),elong_solar(Indices)];
+  pos=[degree2dms(AR(Indices)),degree2dms(DE(Indices)),mag(Indices),Delta(Indices),mov_apar(Indices),...
+      PA(Indices),elong_sol(Indices), elong_luna(Indices), Altitud(Indices),...
+      Azimut(Indices),AngHorario(Indices)/15];
 
 signosaux=sign(DE(Indices));
 signosmas=find(signosaux==1 | signosaux==0);
@@ -365,36 +351,40 @@ clear signosaux signosmas signosmenos
 
 
 for j=1:length(Indices);
-    muestra(j,:)=['<tr><td nowrap><input type="checkbox" name="Obj" value="',cometas.nombres(Indices(j),:),'">',cometas.designacion(Indices(j),:),'</a></td>','<td align="center" nowrap> \t%02.0f %02.0f %05.2f \t</td><td align="center" nowrap> ',signos(j),' %02.0f %02.0f\t%05.2f </td> \t <td align="center" nowrap> %5.2f </td> \t<td align="center" nowrap>%7.4f </td>\t<td align="center" nowrap> %7.2f </td>\t<td align="center" nowrap> %7.3f </td> <td align="center" nowrap> %4.0f </td></tr>\n'];
+    muestra(j,:)=['<tr><td nowrap><input type="checkbox" name="Obj" value="',...
+        cometas.nombres(Indices(j),:),'">',cometas.designacion(Indices(j),:),...
+        '</a></td>','<td align="center" nowrap> \t%02.0f %02.0f %05.2f \t</td><td align="center" nowrap> ',...
+        signos(j),' %02.0f %02.0f\t%05.2f </td> \t <td align="center" nowrap> %5.2f </td> \t<td align="center" nowrap>%7.4f </td>\t<td align="center" nowrap> %7.2f </td>\t<td align="center" nowrap> %7.3f </td> <td align="center" nowrap> %4.0f </td><td align="center" nowrap> %4.0f </td><td align="center" nowrap> %5.1f </td><td align="center" nowrap> %5.1f </td><td align="center" nowrap> %5.1f </td></tr>\n'];
 end
 
 
 webcount=fopen('cometas.html','w');
 
 
-fprintf(webcount,'%s\n','<FORM METHOD=POST ACTION="http://scully.harvard.edu/~cgi/MPEph.COM" TARGET="_NEW"><pre>');
+fprintf(webcount,'%s\n','<FORM METHOD=POST ACTION="http://scully.cfa.harvard.edu/cgi-bin/mpeph.cgi" TARGET="_NEW"><pre>');
 fprintf(webcount,'%s\n','<title>Seguimiento Cometas</title>');
 fprintf(webcount,'%s\n','<body bgcolor="#E0F8F7">');
 fprintf(webcount,'%s\n','<center><p style="font-family: impact;font-size:30pt">Cometas</center>');
 
 fprintf(webcount,'%s','<p style="font-family: times, serif; font-size:14pt; font-style:italic">');
 
-fprintf(webcount,'%s%7.4f%s%7.4f%s\n','Rango de declinaciones:<font color=#DF0174,style=normal>: ',-90,' y ',DElim,'</font>');
+fprintf(webcount,'%s%7.4f%s%7.4f%s\n','Rango de declinaciones:<font color=#DF0174,style=normal>: ',-90,' y ',DELim,'</font>');
 
+[Anio, Mes, Dia]=jul2gre(EpocEfemer(1));
 hh=(Dia-floor(Dia))*24;
 mm=(hh-floor(hh))*60;
 
 fprintf(webcount,'%s%02.0f%s%02.0f%s%04.0f%s%02.0f%s%02.0f%s%s\n','Fecha de posiciones:<font color=#DF0174,style=normal> ',floor(Dia),'-',floor(Mes),'-',Anio,'  ', floor(hh),':', floor(mm),' (UT)','</font>');
-fprintf(webcount,'%s%5.2f%s\n','Magnitud l�mite<font color=#DF0174,style=normal>:', mag,'</font>');
-fprintf(webcount,'%s%4.1f%s\n','Elongaci�n solar  m�nima: <font color=#DF0174,style=normal>:', elong_solarlim, ' grados. </font>');
-fprintf(webcount,'%s\n','Posici�n del observador: <font color=#DF0174,style=normal> MPC 500, Geocentro </font>');
+fprintf(webcount,'%s%5.2f%s\n','Magnitud l&iacute;mite<font color=#DF0174,style=normal>:', MagLim,'</font>');
+fprintf(webcount,'%s%4.1f%s\n','Elongaci&oacute;n solar  m&iacute;nima: <font color=#DF0174,style=normal>:', ElongSLim, ' grados. </font>');
+fprintf(webcount, '%s%s%s%s%s\n','Posiciones respecto al observatorio: <font color=#DF0174,style=normal> MPC  ', observador.cod,', ', observador.name_obs,' </font>');
 fprintf(webcount, '%s%4.2f%s\n','Planilla generada por <a href="http://www.aoacm.com.ar/images/stories/I20/Tutorial.pdf"> orbit_calc</a> </font>');
 
 fprintf(webcount,'%s\n','<P>');
 fprintf(webcount,'%s\n','<center>');
 fprintf(webcount,'%s\n','<table border="1" cellpadding="5" cellspacing="0" bgcolor="#FFFFFF">');
 fprintf(webcount,'%s\n','<tr valign="bottom" bgcolor="#CCCCCC"> ');
-    fprintf(webcount,'%s\n','<td nowrap> Designaci�n </td>');
+    fprintf(webcount,'%s\n','<td nowrap> Designaci&oacute;n </td>');
     fprintf(webcount,'%s\n','<td align="center" nowrap>AR </td>');
     fprintf(webcount,'%s\n','<td align="center" nowrap> DE </td>');
     fprintf(webcount,'%s\n','<td align="center" nowrap> Mag. m1</td>');
@@ -402,35 +392,37 @@ fprintf(webcount,'%s\n','<tr valign="bottom" bgcolor="#CCCCCC"> ');
     fprintf(webcount,'%s\n','<td align="center" nowrap> "/min </td>');
      fprintf(webcount,'%s\n','<td align="center" nowrap> P.A. </td>');
     fprintf(webcount,'%s\n','<td align="center" nowrap>E. Solar </td>');
-
+fprintf(webcount,'%s\n','<td align="center" nowrap>E. Lunar </td>');
+fprintf(webcount,'%s\n','<td align="center" nowrap>Altitud </td>');
+fprintf(webcount,'%s\n','<td align="center" nowrap>Azimut </td>');
+fprintf(webcount,'%s\n','<td align="center" nowrap>Ang. Horario </td>');
 fprintf(webcount,'%s\n','</tr> ');
 
 fprintf(webcount,muestra', pos');
 fprintf(webcount,'%s\n','</table>');
 fprintf(webcount,'%s\n','</center>');
 
-fprintf(webcount,'%s\n','<center><input type=submit value=" Obtener Efem�rides/�rbitas "> <input type=reset value=" Limpiar forma "><p></center>');
+fprintf(webcount,'%s\n','<center><input type=submit value=" Obtener Efem&eacute;rides/&oacute;rbitas "> <input type=reset value=" Limpiar forma "><p></center>');
 fprintf(webcount,'%s\n','<p><hr><p>');
 fprintf(webcount,'%s\n','<center>');
 fprintf(webcount,'%s\n','Opciones:');
-fprintf(webcount,'%s\n','<p>Por defecto las posiciones son referidas al geocentro c�digo MPC 500');
-fprintf(webcount,'%s\n','<p>Fecha inicio efem�rides: <input name="d" maxlength=20 size=17 VALUE="">  N�mero de �opocas en efem�rides <input name="l" maxlength=4 size=4 VALUE="24">');
-fprintf(webcount,'%s\n','<p>Intervalo de las efem�rides: <input name="i" maxlength=3 size=3 VALUE="1">  Efem�rides');
-fprintf(webcount,'%s\n','unidad: <input type="radio" name="u" value="d"> days  <input type="radio" name="u" value="h" CHECKED> horas <input type="radio" name="u" value="m"> minutos');
+fprintf(webcount,'%s\n','<p>Fecha inicio efem&eacute;rides: <input name="d" maxlength=20 size=17 VALUE="">  N&uacute;mero de &eacute;pocas en efem&eacute;rides <input name="l" maxlength=4 size=4 VALUE="24">');
+fprintf(webcount,'%s\n','<p>Intervalo de las efem&eacute;rides: <input name="i" maxlength=3 size=3 VALUE="1">  Efem&eacute;rides');
+fprintf(webcount,'%s\n','unidad: <input type="radio" name="u" value="d"> d&iacute;as  <input type="radio" name="u" value="h" CHECKED> horas <input type="radio" name="u" value="m"> minutos');
 fprintf(webcount,'%s\n','<input type="radio" name="u" value="s"> segundos');
-fprintf(webcount,'%s\n','<p><a href="http://cfa-www.harvard.edu/iau/lists/ObsCodes.html">C�digo Observatorio </a>: <input name="c" maxlength=3 size=3 VALUE="500">');
+fprintf(webcount,'%s\n','<p><a href="http://cfa-www.harvard.edu/iau/lists/ObsCodes.html">C&oacute;digo de observatorio </a>: <input name="c" maxlength=3 size=3 VALUE="',observador.cod,'">');
 fprintf(webcount,'%s\n','<p>Mostrar posiciones en: <input type="radio" name="raty" value="h">sexagecimal truncadas o');
 fprintf(webcount,'%s\n','<input type="radio" name="raty" value="a" CHECKED>sexagesimal completas o');
 fprintf(webcount,'%s\n','<input type="radio" name="raty" value="d"> decimal ');
 fprintf(webcount,'%s\n','<p>Mostrar movimiento en: <input type="radio" name="m" VALUE="s"> "/sec  <input type="radio" name="m" VALUE="m" CHECKED> "/min  <input type="radio" name="m"');
-fprintf(webcount,'%s\n','VALUE="h"> "/hr  <input type="radio" name="m" VALUE="d"> �/d�a');
-fprintf(webcount,'%s\n','<p><input type="radio" name="s" VALUE="t" CHECKED> Movimiento total y direcci�n');
+fprintf(webcount,'%s\n','VALUE="h"> "/hr  <input type="radio" name="m" VALUE="d"> "/d&iacute;a');
+fprintf(webcount,'%s\n','<p><input type="radio" name="s" VALUE="t" CHECKED> Movimiento total y direcci&oacute;n');
 fprintf(webcount,'%s\n','  <input type="radio" name="s" VALUE="s"> Separados R.A. and Decl. Movimiento en el cielo');
 fprintf(webcount,'%s\n','  <input type="radio" name="s" VALUE="c"> Separados R.A. and Decl. Movimiento en coordenadas');
-fprintf(webcount,'%s\n','<p><input type="checkbox" name="igd" value="y" > Suprimir la salida si el sol est� arriba del horizonte local');
-fprintf(webcount,'%s\n','<p><input type="checkbox" name="ibh" value="y" > Suprimir la salida si el objeto est� debajo del horizonte local');
-fprintf(webcount,'%s\n','<p><input type="checkbox" name="fp" value="y"> Generar efem�rides perturbadas para �rbitas imperturbadas');
-fprintf(webcount,'%s\n','<p>Mostrar los elementos para la �poca <input name="oed" maxlength=20 size=17 VALUE="">');
+fprintf(webcount,'%s\n','<p><input type="checkbox" name="igd" value="y" > Suprimir la salida si el sol est&aacute; arriba del horizonte local');
+fprintf(webcount,'%s\n','<p><input type="checkbox" name="ibh" value="y" > Suprimir la salida si el objeto est&aacute; debajo del horizonte local');
+fprintf(webcount,'%s\n','<p><input type="checkbox" name="fp" value="y"> Generar efem&eacute;rides perturbadas para &oacute;rbitas imperturbadas');
+fprintf(webcount,'%s\n','<p>Mostrar los elementos para la &eacute;poca <input name="oed" maxlength=20 size=17 VALUE="">');
 fprintf(webcount,'%s\n','<p><a href="#formats">Formatos</a> :');
 fprintf(webcount,'%s\n','<p>');
 fprintf(webcount,'%s\n','<table border="0" cellpadding="5" cellspacing="0" width="100%">');
@@ -445,7 +437,7 @@ fprintf(webcount,'%s\n','</tr>');
 fprintf(webcount,'%s\n','</table>');
 fprintf(webcount,'%s\n',' </center>');
 fprintf(webcount,'%s\n','<p>');
-fprintf(webcount,'%s\n','<center><input type=submit value=" Obtener efem�rides/�rbitas "> <input type=reset value=" Limpiar forma "><p></center>');
+fprintf(webcount,'%s\n','<center><input type=submit value=" Obtener efem&eacute;rides/&oacute;rbitas "> <input type=reset value=" Limpiar forma "><p></center>');
 fprintf(webcount,'%s\n','<p><hr><p>');
 
 

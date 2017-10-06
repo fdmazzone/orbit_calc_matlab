@@ -4,10 +4,10 @@ function varargout=base(varargin)
 switch true
     case ispc
         load([getenv('APPDATA'),'\orbit_calc2.0\observer.mat']);
-        esta_mpcorb=dir([observador.directorio,'\mpcorb.dat']);
+        esta_mpcorb=dir([observador.directorio,'\MPCORB.DAT']);
     case isunix
         load([getenv('HOME'),'/.orbit_calc2.0/observer.mat']);
-        esta_mpcorb=dir([observador.directorio,'/mpcorb.dat']);
+        esta_mpcorb=dir([observador.directorio,'/MPCORB.DAT']);
 end
 
 if isempty(esta_mpcorb)
@@ -16,14 +16,14 @@ if isempty(esta_mpcorb)
 end
 cantidad_estimativa_lineas=0.005*esta_mpcorb.bytes;
 %%abrimos archivo
-leyenda_barra=sprintf('%d %s',0,'asteroides leidos....');
+leyenda_barra=sprintf('%d %s',0,'asteroides le�dos....');
 progreso=waitbar(0,leyenda_barra);
 
 switch true
     case ispc
-        fid = fopen([observador.directorio,'\mpcorb.dat']);
+        fid = fopen([observador.directorio,'\MPCORB.DAT']);
     case isunix
-        fid = fopen([observador.directorio,'/mpcorb.dat']);
+        fid = fopen([observador.directorio,'/MPCORB.DAT']);
 end
 
 
@@ -135,7 +135,7 @@ while ~feof(fid)
     
     
     
-   leyenda_barra=sprintf('%d %s',largo_bloque*bloques_leidos,'asteroides leidos....');
+   leyenda_barra=sprintf('%d %s',largo_bloque*bloques_leidos,'asteroides le�dos....');
     waitbar(largo_bloque*bloques_leidos/cantidad_estimativa_lineas,progreso,leyenda_barra);
 
     

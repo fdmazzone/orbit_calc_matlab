@@ -10,14 +10,14 @@ funcion=@fuerza_nb;
 
 %%%Colocacion
 % Integrador=@colocacion_nb_adap; 
-% parametros_Integrador.orden=10;
+% parametros_Integrador.orden=12;
 % parametros_Integrador.paso=.3;
 % parametros_Integrador.tol=1e-21;
 % parametros_Integrador.iter=2;
 
 %%multipaso
 Integrador=@multipaso_nb_implicito;
-parametros_Integrador.paso=1;
+parametros_Integrador.paso=15;
 parametros_Integrador.orden=12;
 
 
@@ -47,7 +47,7 @@ end
 
 
 %%====================================================
-[GM1,funcion_datos_sol,funcion_datos,posicion_ini,velocidad_ini,Jini]= sistema(cantidad_cuerpos_menores);
+[GM1,funcion_datos_sol,funcion_datos,posicion_ini,velocidad_ini,Jini]= sistema_exterior(cantidad_cuerpos_menores);
 cantidad_cuerpos=funcion_datos.cantidad_planetas+cantidad_cuerpos_menores; 
 
 %%integrar el sistema solar hasta la epoca de los elementos del cuerpo
@@ -57,7 +57,7 @@ parametros_Integrador.mensaje='Integrando sistema solar hasta epoca asteroides..
 
 
 
-%%==========Convertir coordenadas a baricèntricas
+%%==========Convertir coordenadas a baricï¿½ntricas
 
 [pos0,posdot0]=helio2bari(pos0,posdot0,pos,vel,GM1);
 pos0=[pos,pos0];
@@ -66,14 +66,14 @@ vel0=[vel,posdot0];
 
 
 
-%%% Integramos el sistema solar más el cuerpo, primera en la epoca futuras
+%%% Integramos el sistema solar mï¿½s el cuerpo, primera en la epoca futuras
 
 %%PasoEpoc=efemerides_epocas(2)-efemerides_epocas(1);
 
 %%CantEpocPaso=1000;
 LimGuardar=floor(cantidad_epocas/CantEpocPaso)+1;
 PasoTot=LimGuardar*CantEpocPaso;
-efemerides_epocas=asteroides.epoca(1)+(0:PasoEpoc:PasoEpoc*PasoTot-1);
+efemerides_epocas=asteroides.epoca(1)-(0:PasoEpoc:PasoEpoc*PasoTot-1);
 
 efemerides_epocas=reshape(efemerides_epocas,[CantEpocPaso,LimGuardar]);
 IndBloque=1;
@@ -125,8 +125,8 @@ V0=reshape((-GM1(2:end)/GM1(1))*vel_bari(:,:),[1,3,CantEpocPaso]);
 pos_bari=cat(1,R0,pos_bari);
 vel_bari=cat(1,V0,vel_bari);
 
-PosHelio=pos_bari-repmat(pos_bari(1,:,:),[cantidad_cuerpos+1,1,1]);
-VelHelio=vel_bari-repmat(vel_bari(1,:,:),[cantidad_cuerpos+1,1,1]);
+PosHelio=pos_bari(2:end,:,:)-repmat(pos_bari(1,:,:),[cantidad_cuerpos,1,1]);
+VelHelio=vel_bari(2:end,:,:)-repmat(vel_bari(1,:,:),[cantidad_cuerpos,1,1]);
 
 % Cuerpo=squeeze(pos_helio(12:end,:,end));
 % VCuerpo=squeeze(vel_helio(12:end,:,end));

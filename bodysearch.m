@@ -74,13 +74,10 @@ for indices_var_char=1:length(donde_es_char)
               clasedec=hex2dec(asteroides.clase(filtro,3:4));
               filtro_filtro=find(clasedec==9);
               filtro=filtro(filtro_filtro);
-        case 'centaur'
+
+        case 'distante'
               clasedec=hex2dec(asteroides.clase(filtro,3:4));
               filtro_filtro=find(clasedec==10);
-              filtro=filtro(filtro_filtro);    
-        case 'TNO'
-              clasedec=hex2dec(asteroides.clase(filtro,3:4));
-              filtro_filtro=find(clasedec==14 | clasedec==15 | clasedec==16 | clasedec==17  );
               filtro=filtro(filtro_filtro);
         case 'last obs'
               filtro_filtro=find(asteroides.ult_obs(filtro)<=gre2jul(Dia,Mes,Anio)-varargin{indice+1}(2)*365.25...
@@ -381,12 +378,12 @@ clc
     fprintf( '%s%4.2f%s\n','Tiempo m�ximo de exposici�n calculado para una resoluci�n de: ', observador.res,' arco seg/pixel');
     fprintf('%s %7.0f\n','Cantidad de cuerpos:',length(Indices));
     fprintf( '%s\n','Planilla generada por <a href="http://astrosurf.com/salvador/Programas.html"> orbit_calc</a> ');
-    disp('========================================================================================================================================================================================================================')
+    disp('========================================================================================================================================================================================================================================================')
 
 
 
-disp('Numeracion-Designacion              AR               DE            Mag.    Delta         "/min     P.A.         T. Max      Diam.     U   E.Sol  E.Luna   Clase                Ult. Obs.        #Opos.   Arco      T_j')
-disp('========================================================================================================================================================================================================================')
+disp('Numeracion-Designacion              AR               DE            Mag.    Delta             "/min          P.A.            T. Max          Diam.         U   E.Sol     E.Luna    Clase                    Ult. Obs.      #Opos.   Arco            T_j')
+disp('========================================================================================================================================================================================================================================================')
 
 disp(texto_resultados);
 varargout{1}=size(muestra,1);
@@ -442,7 +439,7 @@ if is_html==1;
   
     webcount=fopen('busqueda.html','w');
     fprintf(webcount,'%s\n','<html>');
-    fprintf(webcount,'%s\n','<FORM METHOD=POST ACTION="http://scully.harvard.edu/~cgi/MPEph.COM" TARGET="_NEW"><pre>');
+    fprintf(webcount,'%s\n','<FORM METHOD=POST ACTION="http://scully.cfa.harvard.edu/cgi-bin/mpeph.cgi" TARGET="_NEW"><pre>');
 
 
 
@@ -577,10 +574,10 @@ function [claseb, isneo]=traducir_clase(clase)
     is_hilda=strmatch('08',clase(:,3:4));
     is_troyan=strmatch('09',clase(:,3:4));
     is_centaur=strmatch('0A',clase(:,3:4));
-    is_plutino=strmatch('0E',clase(:,3:4));
-    is_otros=strmatch('0F',clase(:,3:4));
-    is_cube=strmatch('10',clase(:,3:4));
-    is_disper=strmatch('11',clase(:,3:4));
+    %is_plutino=strmatch('0E',clase(:,3:4));
+    %is_otros=strmatch('0F',clase(:,3:4));
+    %is_cube=strmatch('10',clase(:,3:4));
+    %is_disper=strmatch('11',clase(:,3:4));
     is_pha=strmatch('8',clase(:,1));
     isneo=strmatch('8',clase(:,2));
     claseb=repmat('            ',[size(clase,1),1]);
@@ -613,20 +610,20 @@ function [claseb, isneo]=traducir_clase(clase)
         claseb(is_troyan,:)=repmat('Jup. Troyan ',[length(is_troyan),1]);
     end
     if ~isempty(is_centaur);
-        claseb(is_centaur,:)=repmat('Centaur     ',[length(is_centaur),1]);
+        claseb(is_centaur,:)=repmat('Obj. Lejano ',[length(is_centaur),1]);
     end
-    if ~isempty(is_plutino);
-        claseb(is_plutino,:)=repmat('Plutino     ',[length(is_plutino),1]);
-    end
-    if ~isempty(is_otros);
-        claseb(is_otros,:)=repmat('Other TNO   ',[length(is_otros),1]);
-    end
-    if ~isempty(is_cube);
-        claseb(is_cube,:)=repmat('Cubewano    ',[length(is_cube),1]); 
-    end
-    if isempty(is_disper)==0;
-        claseb(is_disper,:)=repmat('Disp. Disk  ',[length(is_disper),1]); 
-    end
+%     if ~isempty(is_plutino);
+%         claseb(is_plutino,:)=repmat('Plutino     ',[length(is_plutino),1]);
+%     end
+%     if ~isempty(is_otros);
+%         claseb(is_otros,:)=repmat('Other TNO   ',[length(is_otros),1]);
+%     end
+%     if ~isempty(is_cube);
+%         claseb(is_cube,:)=repmat('Cubewano    ',[length(is_cube),1]); 
+%     end
+%     if isempty(is_disper)==0;
+%         claseb(is_disper,:)=repmat('Disp. Disk  ',[length(is_disper),1]); 
+%     end
     if ~isempty(is_pha);
         claseb(is_pha,:)=repmat('PHA         ',[length(is_pha),1]); 
     end

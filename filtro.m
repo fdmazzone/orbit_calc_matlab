@@ -203,9 +203,8 @@ switch get(handles.clase,'Value')
     case 6
         clase='jupiter troyan';
     case 7
-        clase='centaur';
-    case 8
-        clase='TNO';
+        clase='distante';
+
     otherwise
         
 end

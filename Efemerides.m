@@ -731,14 +731,14 @@ FracIlumLuna=squeeze((1+cosd(beta_luna))/2);
         AltitudS=squeeze(Altitud(1,:,:));
         Altitud=squeeze(Altitud(end,:,:));
         Azimut=squeeze(Azimut(end,:,:));
-
+        AngHorario=squeeze(AngHorario(end,:,:));
    
       
         
         
-        pos=[anios, meses, dias,horas,minutos,segundos,floor(AR),ARmin,ARseg,fix(DE)+0.1*sign(DE),DEmin,DEseg,mag, Delta,mov_apar,PA, Altitud,Azimut, beta ,  elong_luna,FracIlumLuna, AltitudL, elong_sol, AltitudS];
+        pos=[anios, meses, dias,horas,minutos,segundos,floor(AR),ARmin,ARseg,fix(DE)+0.1*sign(DE),DEmin,DEseg,mag, Delta,mov_apar,PA, Altitud,Azimut, beta , AngHorario/15,  elong_luna,FracIlumLuna, AltitudL, elong_sol, AltitudS];
         
-        formato='%4.0f %02.0f %02.0f  %02.0f %02.0f %02.0f   %02.0f %02.0f %05.2f  %0+3.0f %02.0f %05.2f   %6.2f   %10.6f %10.4f  %7.3f    %5.1f   %5.1f %6.2f    %5.1f  %4.2f  %6.2f  %5.1f  %6.2f\n';
+        formato='%4.0f %02.0f %02.0f  %02.0f %02.0f %02.0f   %02.0f %02.0f %05.2f  %0+3.0f %02.0f %05.2f   %6.2f   %10.6f %10.4f  %7.3f    %5.1f   %5.1f %6.2f  %5.1f      %5.1f  %4.2f  %5.1f  %5.1f  %6.2f\n';
         
         
 
@@ -746,7 +746,7 @@ FracIlumLuna=squeeze((1+cosd(beta_luna))/2);
         texto2=sprintf('%s %s','Observatorio:',observador.name_obs);
         texto3=sprintf('%s %s','Integrador:',NombreMet);
         texto4=sprintf( '%s%16.2f %s','Tiempo de Computo',toc, 'seg');
-        texto5=sprintf('%s ','aaaa mm dd  hh mm ss       AR           DE           Mag       Delta       "/min     PA        Alt.    Az.   Fase     |Elong| Fase|  Alt. | Elong | Alt.       ');
+        texto5=sprintf('%s ','aaaa mm dd  hh mm ss       AR           DE           Mag       Delta       "/min     PA        Alt.    Az.   Fase   Ang Hor.   |Elong| Fase|  Alt. | Elong | Alt.       ');
         
         
         
@@ -756,8 +756,8 @@ FracIlumLuna=squeeze((1+cosd(beta_luna))/2);
         disp(texto2);
         disp(texto3);
         disp(texto4)
-        disp('========================================================================================================================================================');
-        disp('                                                                                                                      |        Luna       |     Sol      |');
+        disp('===================================================================================================================================================================');
+        disp('                                                                                                                               |        Luna       |     Sol      |');
         disp(texto5);
         disp(texto6);
         
@@ -770,8 +770,8 @@ FracIlumLuna=squeeze((1+cosd(beta_luna))/2);
             Largo1= min(Largo/(cosd(DE(1))+eps),43200);
             
             switch observador.cat_activo
-                case 'UCAC2'
-                    [XPlaca, YPlaca, ~, DatosEstrellas]=ucac2_lector(AR(1),DE(1), Largo1/60,Largo2/60);
+                case 'UCAC4'
+                    [XPlaca, YPlaca, ~, DatosEstrellas]=ucac4_lector(AR(1),DE(1), Largo1/60,Largo2/60);
                 case 'UCAC3'
                     [XPlaca, YPlaca, ~, DatosEstrellas]=ucac3_lector(AR(1),DE(1), Largo1/60,Largo2/60);
                 otherwise
@@ -884,10 +884,13 @@ FracIlumLuna=squeeze((1+cosd(beta_luna))/2);
           
             
             switch observador.cat_activo
-                case 'UCAC2'
-                    [XPlaca, YPlaca, ~, DatosEstrellas]=ucac2_lector(CentroAR,CentroDE, Largo1/60,Largo2/60);
+%                 case 'UCAC2'
+%                     [XPlaca, YPlaca, ~, DatosEstrellas]=ucac2_lector(CentroAR,CentroDE, Largo1/60,Largo2/60);
                 case 'UCAC3'
                     [XPlaca, YPlaca, ~, DatosEstrellas]=ucac3_lector(CentroAR,CentroDE, Largo1/60,Largo2/60);
+                case 'UCAC4'
+                    [XPlaca, YPlaca, ~, DatosEstrellas]=ucac4_lector(CentroAR,CentroDE, Largo1/60,Largo2/60);
+
                 otherwise
                     Catalogo=observador.cat_activo(10:end);
                     [XPlaca, YPlaca, ~, DatosEstrellas]=internet_cat_lector(Catalogo,CentroAR,CentroDE, Largo1/60,Largo2/60);
@@ -1039,7 +1042,16 @@ CurDir=cd;
 if ~strcmp(CurDir,observador.directorio1)
     movefile('ucac3.txt',observador.directorio1);
 end
-fid=fopen([observador.directorio1,'\ucac3.txt']);
+
+
+switch true
+    case ispc
+        fid=fopen([observador.directorio1,'\ucac3.txt']);
+    case isunix
+        fid=fopen([observador.directorio1,'/ucac3.txt']);
+end
+
+
 S=textscan(fid,'%s%f%f%f%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%f%*s%f%*[^\n]');
 fclose(fid);
 NombresEstrellas=char(S{1});
@@ -1056,29 +1068,42 @@ DatosEstrellas=[DatosEstrellas(I,1:2),V];
 [XPlaca,YPlaca]=foto(DatosEstrellas(:,1),DatosEstrellas(:,2),AR,DE);
 
 
-function [XPlaca, YPlaca, NombresEstrellas, DatosEstrellas]=ucac2_lector(AR,DE, Ancho,Alto);
+
+function [XPlaca, YPlaca, NombresEstrellas, DatosEstrellas]=ucac4_lector(AR,DE, Ancho,Alto);
 AR=15*AR;
 
 switch true
     case ispc
         load([getenv('APPDATA'),'\orbit_calc2.0\observer.mat']);
+        eval(['[CantEstrellas, Mensaje]=system(''',observador.directorio1,'\u4test ',num2str(AR),' ', num2str(DE),' ',num2str(Ancho),' ',num2str(Alto),' ',observador.directorio_ucac4,''');']);
     case isunix
         load([getenv('HOME'),'/.orbit_calc2.0/observer.mat']);
+        eval(['[CantEstrellas, Mensaje]=system(''',observador.directorio1,'/u4test ',num2str(AR),' ', num2str(DE),' ',num2str(Ancho),' ',num2str(Alto),' ',observador.directorio_ucac4,''');']);
 end
 
-eval(['[CantEstrellas, Mensaje]=system(''',observador.directorio1,'\UCAC2 ',num2str(AR),' ', num2str(DE),' ',num2str(Ancho),' ',num2str(Alto),' ',observador.directorio_ucac2,''');']);
+
 CurDir=cd;
 
 if ~strcmp(CurDir,observador.directorio1)
-    movefile('ucac2.txt',observador.directorio1);
+    movefile('ucac4.txt',observador.directorio1);
 end
-fid=fopen([observador.directorio1,'\ucac2.txt']);
-S=textscan(fid,'%s%f%f%f%*[^\n]');
+
+switch true
+    case ispc
+        fid=fopen([observador.directorio1,'\ucac4.txt']);
+    case isunix
+        fid=fopen([observador.directorio1,'/ucac4.txt']);
+end
+
+
+
+
+S=textscan(fid,'%s%f%f%f%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%f%*s%f%*[^\n]');
 fclose(fid);
 NombresEstrellas=char(S{1});
-DatosEstrellas=[S{2},S{3},S{4}];
-V=S{4};
-
+DatosEstrellas=[S{2},S{3},S{4},S{5},S{6}];
+%V=0.531*(DatosEstrellas(:,4)-DatosEstrellas(:,5))+0.906*DatosEstrellas(:,3)+0.95;
+V=DatosEstrellas(:,3);
 [nosirve,I]=sort(V);
 I=I(1:min(length(I),2000));
 J=find(V(I)>-3 & V(I)<18);
@@ -1087,6 +1112,40 @@ I=I(J);
 V=V(I);
 DatosEstrellas=[DatosEstrellas(I,1:2),V];
 [XPlaca,YPlaca]=foto(DatosEstrellas(:,1),DatosEstrellas(:,2),AR,DE);
+
+
+
+% function [XPlaca, YPlaca, NombresEstrellas, DatosEstrellas]=ucac2_lector(AR,DE, Ancho,Alto);
+% AR=15*AR;
+% 
+% switch true
+%     case ispc
+%         load([getenv('APPDATA'),'\orbit_calc2.0\observer.mat']);
+%     case isunix
+%         load([getenv('HOME'),'/.orbit_calc2.0/observer.mat']);
+% end
+% 
+% eval(['[CantEstrellas, Mensaje]=system(''',observador.directorio1,'\UCAC2 ',num2str(AR),' ', num2str(DE),' ',num2str(Ancho),' ',num2str(Alto),' ',observador.directorio_ucac2,''');']);
+% CurDir=cd;
+% 
+% if ~strcmp(CurDir,observador.directorio1)
+%     movefile('ucac2.txt',observador.directorio1);
+% end
+% fid=fopen([observador.directorio1,'\ucac2.txt']);
+% S=textscan(fid,'%s%f%f%f%*[^\n]');
+% fclose(fid);
+% NombresEstrellas=char(S{1});
+% DatosEstrellas=[S{2},S{3},S{4}];
+% V=S{4};
+% 
+% [nosirve,I]=sort(V);
+% I=I(1:min(length(I),2000));
+% J=find(V(I)>-3 & V(I)<18);
+% I=I(J);
+% 
+% V=V(I);
+% DatosEstrellas=[DatosEstrellas(I,1:2),V];
+% [XPlaca,YPlaca]=foto(DatosEstrellas(:,1),DatosEstrellas(:,2),AR,DE);
 
 
 function [XPlaca, YPlaca, NombresEstrellas, DatosEstrellas]=internet_cat_lector(Catalogo,AR,DE, Ancho,Alto);
@@ -1358,7 +1417,7 @@ if isempty(HalloPto)
             PosDot0=handles.base_com.velocidades(entradas1,:)';
             Designacion=handles.base_com.designacion(entradas1,:);
             Nombres=Designacion;
-            Epoca=handles.base_com.epocas;
+            Epoca=handles.base_com.epocas(1);
             H=handles.base_com.H(entradas1(1));
             G=handles.base_com.G(entradas1(1));
         end

@@ -1,14 +1,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Esta  funciòn implementa un método de colocación adaptativo para      %%
-%% resolver problemas autònomos de segundo orden. En particular se aplica%%
+%% Esta  funciï¿½n implementa un mï¿½todo de colocaciï¿½n adaptativo para      %%
+%% resolver problemas autï¿½nomos de segundo orden. En particular se aplica%%
 %% al problema de los n-cuerpos                                                                %%
-%% efemerides_epocas= epocas en la que se quiere almacenar la solución   %%
+%% efemerides_epocas= epocas en la que se quiere almacenar la soluciï¿½n   %%
 %%                                                               %%
-%% iteraciones_pasos=cantidad de iteraciones para resolver la ecuacón no %%
-%% lineal en cada paso del método                                        %%
-%% orden=orden del método                                                %%
+%% iteraciones_pasos=cantidad de iteraciones para resolver la ecuacï¿½n no %%
+%% lineal en cada paso del mï¿½todo                                        %%
+%% orden=orden del mï¿½todo                                                %%
 %% delta_t=longitud del paso inicial                                     %%
-%% tol=tolerancia para la adaptacón                                      %%
+%% tol=tolerancia para la adaptacï¿½n                                      %%
 %% posicion_out y velocidad_out solucion              %%
 %% en efemerides_epocas                                                  %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -45,7 +45,7 @@ posicion_out=zeros(cant,size(posicion,2));
 velocidad_out=zeros(cant,size(posicion,2));
 
 
-indice_out=1; %contador que lleva registro de cuantas èpocas de las 
+indice_out=1; %contador que lleva registro de cuantas ï¿½pocas de las 
 %efemerides fueron resueltas
 
 
@@ -58,6 +58,8 @@ indice_out=1; %contador que lleva registro de cuantas èpocas de las
 load('matrices');
 Matriz_iteracion=Matriz_iteracion(1:orden-1,1:orden-1);
 Matriz_diferencias=Matriz_diferencias(1:orden-1,1:orden-1);
+Matriz=Matriz_iteracion*Matriz_diferencias;
+
 
 l=[2:orden];
 exponentes=repmat(l,[orden-1,1]);
@@ -99,8 +101,7 @@ matriz_fuerza=funcion(estado_epocas,funcion_datos);
 taylor_2_term=ones(orden-1,1)*posicion+(colocacion_epocas-Jini)*velocidad;
 
 for indi=2:1:(orden-1)
-    D=Matriz_diferencias*matriz_fuerza;
-    C=Matriz_iteracion*D;
+    C=Matriz*matriz_fuerza;
     estado_epocas=taylor_2_term+delta_t^2*matriz_epocas_escala*C;
     matriz_fuerza=funcion(estado_epocas,funcion_datos);
 end
@@ -132,7 +133,7 @@ end
 
 
 
-iteraciones=1; %contador para las iteraciones de la solución del sistema 
+iteraciones=1; %contador para las iteraciones de la soluciï¿½n del sistema 
 %% no lineal
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -159,7 +160,6 @@ while indice_out<=cant
    
    matriz_variable=repmat((orden-2:r:(orden-2)*(1+r))',[1,orden-1]).^exponentes;
    
-   
 %%Estimacion de nuevos estados a partir del paso anterior
     estado_epocas=ones(orden-1,1)*posicion...
         +(colocacion_epocas-colocacion_epocas_pas)*velocidad...    
@@ -173,8 +173,7 @@ while indice_out<=cant
     
    while iteraciones<=iteraciones_pasos
         matriz_fuerza=funcion(estado_epocas,funcion_datos);
-        D=Matriz_diferencias*matriz_fuerza;
-        C=Matriz_iteracion*D;
+        C=Matriz*matriz_fuerza;
         estado_epocas=ones(orden-1,1)*posicion...
             +(colocacion_epocas-colocacion_epocas_ini)*velocidad...
             +delta_t^2*matriz_epocas_escala*C;
@@ -188,7 +187,7 @@ while indice_out<=cant
     
     if ~isempty(Indices)
 
-        efmerides_epocas_aux=efemerides_epocas(Indices);
+        %efmerides_epocas_aux=efemerides_epocas(Indices);
         posicion_out(indice_out:indice_out+length(Indices)-1,:)=ones(length(Indices),1)*posicion...
             +(efemerides_epocas(Indices)-colocacion_epocas_ini)*velocidad...
             +delta_t^2*monomios_taylor((orden-2)*delta_t^(-1)*(efemerides_epocas(Indices)-colocacion_epocas_ini),orden,2)*diag(matriz_epoca_fila)*C;

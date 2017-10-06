@@ -2,7 +2,7 @@ function [GM1,funcion_datos_sol,funcion_datos,posicion_ini,velocidad_ini,Jini]= 
     
 %%=============Posiciones y velocidades del sistema solar 1/1/2010===============
 %%=Descripcion de la tabla
-%%fila1:  epoca de la posición  completada a 6 columnas con ceros
+%%fila1:  epoca de la posiciï¿½n  completada a 6 columnas con ceros
 %%fila2:mercurio
 %%fila3:venus
 %%fila4:tierra
@@ -12,26 +12,26 @@ function [GM1,funcion_datos_sol,funcion_datos,posicion_ini,velocidad_ini,Jini]= 
 %%fila8:saturno
 %%fila9:urano
 %%fila10:neptuno
-%%Datos extraídos del Horizons JPL.
+%%Datos extraï¿½dos del Horizons JPL.
 Jini=2455197.5 ;
 
 posicion_ini=[  4.505316448014699E+00 -2.163554992150158E+00 -9.190506642404675E-02...
                -9.468002747491772E+00  2.616170194615976E-01  3.722137409934489E-01...
                 2.003287142254730E+01 -1.529789587584767E+00 -2.652228371169991E-01...
-                2.481342071982337E+01 -1.689466771579366E+01 -2.239283359739457E-01...
-                1.624023439973141E+00 -3.158449831325791E+01  2.909973245858946E+00];
+                2.481342071982337E+01 -1.689466771579366E+01 -2.239283359739457E-01];%...
+%                1.624023439973141E+00 -3.158449831325791E+01  2.909973245858946E+00];
 
 
 
 velocidad_ini=[ 3.174272294118944E-03  7.161028472593621E-03 -1.007932634913023E-04...
                 -4.520982009246061E-04 -5.588245900866611E-03  1.148907610664285E-04...
                 2.708536832422564E-04  3.738296124910372E-03  1.043945945010953E-05...
-                1.746290591932061E-03  2.613664871606340E-03 -9.397396369692273E-05...
-                3.201285843237125E-03 -4.334750109871883E-04 -8.749408645446409E-04];
+                1.746290591932061E-03  2.613664871606340E-03 -9.397396369692273E-05];%...
+     %           3.201285843237125E-03 -4.334750109871883E-04 -8.749408645446409E-04];
 
 
 %% valores de GM 
-%% Factores de conversión desde el jpl 
+%% Factores de conversiï¿½n desde el jpl 
 %UA=149597870.691;
 %dia=86400;
 %%  GM en km^3 s^(-2)
@@ -55,10 +55,10 @@ GMjup=GMS/1047.3486;
 GMsat=GMS/3497.898;
 GMura=GMS/22902.98;
 GMnep=GMS/19412.24;
-GMpluton=GMS/135200000;
+%GMpluton=GMS/135200000;
 
 
-GM1=[GMS,GMjup,GMsat,GMura,GMnep,GMpluton];
+GM1=[GMS,GMjup,GMsat,GMura,GMnep];%,GMpluton];
 
 
 if nargin>1

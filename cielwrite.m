@@ -2,17 +2,17 @@
 %%en entradas validas para Carts du Ciel. El output es el archivo
 %% asteroides.dat
 function cielwrite(nombres,H,G,epoca,M,peri,node,incli,e,a)
-global directorio1
-switch true
-    case ispc
-        load([getenv('APPDATA'),'\orbit_calc2.0\observer.mat']);
-        fid=fopen([observador.directorio_ciel,'\asteroides.dat'],'w');
-    case isunix
-        load([getenv('HOME'),'/.orbit_calc2.0/observer.mat']);
-        fid=fopen([observador.directorio_ciel,'/asteroides.dat'],'w');
-end
+% global directorio1
+% switch true
+%     case ispc
+%         load([getenv('APPDATA'),'\orbit_calc2.0\observer.mat']);
+%         fid=fopen([observador.directorio_ciel,'\asteroides.dat'],'w');
+%     case isunix
+%         load([getenv('HOME'),'/.orbit_calc2.0/observer.mat']);
+%         fid=fopen([observador.directorio_ciel,'/asteroides.dat'],'w');
+% end
 
-
+fid=fopen('asteroides.dat','w');
 
 n=length(H);
 [anio, mes, dia]=jul2gre(epoca);
