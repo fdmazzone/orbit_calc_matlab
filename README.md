@@ -1,1 +1,1 @@
-Proyecto orbit_calc, rutiunas mecanica celeste para matlab
+Proyecto orbit_calc, rutiunas mecánica celeste para matlab
